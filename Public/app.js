@@ -1,0 +1,1 @@
+setTimeout($(location).attr("href", "/detail?ArticleId=10"), 2000)
