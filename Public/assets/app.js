@@ -5,7 +5,7 @@ $.getJSON("/articles", function(data) {
     // For each one
     for (var i = 0; i < data.length; i++) {
       // Display the apropos information on the page
-      $("#articles").append(
+      $("#article").append(
           "<p data-id='" +
            data[i]._id + "'>" + 
            data[i].title + 
@@ -79,3 +79,22 @@ $.getJSON("/articles", function(data) {
     $("#bodyinput").val("");
   });
   
+  function handleScrape() {
+    $.get("/scrape").then(function(data) {
+      location.reload();
+    });
+  }
+
+
+//   $(document).on("click", ".scrape", function() {
+//     $.ajax({
+//         method: "GET",
+//         url: "/scrape"
+//     })
+//     // With that done
+//     .then(function(data) {
+//         // Log the response
+//         console.log(data);
+//         location.reload();
+//     });
+// })
