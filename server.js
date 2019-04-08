@@ -9,16 +9,20 @@ var bodyParser = require("body-parser");
 var axios = require("axios");
 var cheerio = require("cheerio");
 
-// Require all models
-var db = require("./models");
+mongoose.Promise = Promise;
+var db = mongoose.connection;
 
-var PORT = 3000;
+var PORT = process.env.PORT || 3000
+
+// Require all models
+var db = require("./models/Article.js");
 
 // Initialize Express
 var app = express();
 
+// --------------------
 // Configure middleware
-
+// --------------------
 // Use morgan logger for logging requests
 app.use(logger("dev"));
 // Parse request body as JSON
@@ -26,12 +30,30 @@ app.use(express.urlencoded({ extended: true }));
 // Make public a static folder
 app.use(express.static("public"));
 
-// Connect to the Mongo DB
-mongoose.connect("mongodb://localhost/mongoHeadlines", { useNewUrlParser: true });
+// Set Handlebars.
+var exphbs = require("express-handlebars");
 
+app.engine(
+  "handlebars",
+  exphbs({
+    defaultLayout: "main"
+  })
+);
+app.set("view engine", "handlebars");
+
+// Connect to the Mongo DB
+// mongoose.connect("mongodb://localhost/mongoHeadlines", { useNewUrlParser: true });
+var databaseUri = "mongodb://localhost/mongoHeadlines";
+if (process.env.MONGODB_URI) {
+  mongoose.connect(process.env.MONGODB_URI);
+}
+else {
+  mongoose.connect(databaseUri);
+  console.log("Conneted to mongoHeadlines")
+}
 // Routes
 
-// A GET route for scraping the echoJS website
+// A GET route for scraping the Onion website
 app.get("/scrape", function(req, res) {
   // First, we grab the body of the html with axios
   axios.get("https://www.theonion.com/").then(function(response) {
@@ -47,6 +69,9 @@ app.get("/scrape", function(req, res) {
       result.title = $(this)
         .children("a")
         .text();
+      result.summary = $(this)
+        .children('div')
+        .text().trim() + "";
       result.link = $(this)
         .children("a")
         .attr("href");
@@ -62,10 +87,20 @@ app.get("/scrape", function(req, res) {
           console.log(err);
         });
     });
-
+    
+    db.Article.findOneAndUpdate({headline: result.headline}, result, {upsert: true})
+    .then(function(dbArticle) {
+      // View the added result in the console
+      console.log(dbArticle);
+      
+    })
+    .catch(function(err) {
+      // If an error occurred, send it to the client
+      return res.json(err);
+    });
+  });
     // Send a message to the client
     res.send("Scrape Complete");
-  });
 });
 
 // Route for getting all Articles from the db
