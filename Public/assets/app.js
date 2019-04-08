@@ -5,9 +5,11 @@ $.getJSON("/articles", function(data) {
     // For each one
     for (var i = 0; i < data.length; i++) {
       // Display the apropos information on the page
-      $("#article").append(
-          "<p data-id='" +
-           data[i]._id + "'>" + 
+      $("#article").prepend(
+          "<p data-id='" + 
+           data[i]._id + "'>" +
+           data[i].summary + 
+           "<br />" + 
            data[i].title + 
            "<br />" + 
            data[i].link + 
@@ -78,23 +80,17 @@ $.getJSON("/articles", function(data) {
     $("#titleinput").val("");
     $("#bodyinput").val("");
   });
-  
-  function handleScrape() {
-    $.get("/scrape").then(function(data) {
-      location.reload();
+
+  $(document).on("click", ".scrape", function() {
+    console.log('click scrape');
+    $.ajax({
+        method: "GET",
+        url: "/scrape"
+    })
+    // With that done
+    .then(function(data) {
+        // Log the response
+        console.log(data);
+        location.reload();
     });
-  }
-
-
-//   $(document).on("click", ".scrape", function() {
-//     $.ajax({
-//         method: "GET",
-//         url: "/scrape"
-//     })
-//     // With that done
-//     .then(function(data) {
-//         // Log the response
-//         console.log(data);
-//         location.reload();
-//     });
-// })
+  })

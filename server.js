@@ -54,6 +54,53 @@ db.on("error", function(error) {
 
 // Routes:
 
+// A GET route for scraping the Onion website
+app.get("/scrape", function(req, res) {
+  // First, we grab the body of the html with request
+  axios.get("https://www.theonion.com/").then(function(response) {
+  // Then, we load that into cheerio and save it to $ for a shorthand selector
+  var $ = cheerio.load(response.data);
+
+  $("article.post-item-frontpage").each(function(i, element) {
+    // Save an empty result object
+
+    var result = {};
+
+    // Add the text and href of every link, and save them as properties of the result object
+    result.title = $(this)
+      .children("header")
+      .children("h1")
+      .text();
+      console.log(result.title);
+    result.summary = $(this)
+      .children(".item__content")
+      .children(".excerpt")
+      .children("p")
+      .text();
+    result.link = $(this)
+      .children("header")
+      .children("h1")
+      .children("a")
+      .attr("href");
+
+    // Check to see if the article already exists in the database; if it does, don't add another copy; 
+    // but if it doesn't, then insert the article into the database
+    Article.findOneAndUpdate({title: result.title}, result, {upsert: true})
+      .then(function(dbArticle) {
+        // View the added result in the console
+        console.log(dbArticle);
+        
+      })
+      .catch(function(err) {
+        // If an error occurred, send it to the client
+        return res.json(err);
+      });
+    });
+
+    // If we were able to successfully scrape and save an Article, send a message to the client
+    res.send("Scrape Complete - Hello");
+    });
+});
 
 // Route for getting all Articles from the db
 app.get("/articles", function(req, res) {
@@ -69,57 +116,11 @@ app.get("/articles", function(req, res) {
     });
 });
 
-
-// A GET route for scraping the Onion website
-app.get("/scrape", function(req, res) {
-  // First, we grab the body of the html with axios
-  axios.get("https://www.theonion.com/").then(function(response) {
-    // Then, we load that into cheerio and save it to $ for a shorthand selector
-    var $ = cheerio.load(response.data);
-
-    // Now, we grab every h2 within an article tag, and do the following:
-    $("article h1").each(function(i, element) {
-      // Save an empty result object
-      var result = {};
-
-      // Add the text and href of every link, and save them as properties of the result object
-      result.title = $(this)
-        .children("a")
-        .text();
-      result.summary = $(this)
-        .children('div')
-        .text().trim() + "";
-      result.link = $(this)
-        .children("a")
-        .attr("href");
-
-      // Create a new Article using the `result` object built from scraping
-      Article.create(result)
-        .then(function(dbArticle) {
-          // View the added result in the console
-          console.log(dbArticle);
-        })
-        .catch(function(err) {
-          // If an error occurred, log it
-          console.log(err);
-        });
-    });
-    
-    Article.findOneAndUpdate({headline: result.headline}, result, {upsert: true})
-    .then(function(dbArticle) {
-      // View the added result in the console
-      console.log(dbArticle);
-      
-    })
-    .catch(function(err) {
-      // If an error occurred, send it to the client
-      return res.json(err);
-    });
+app.get("/articles/clear", function(req, res){
+  Article.remove().then(function(){
+    res.send("Database cleared!");
   });
-    // Send a message to the client
-    res.send("Scrape Complete");
-});
-
+})
 
 // Route for grabbing a specific Article by id, populate it with it's note
 app.get("/articles/:id", function(req, res) {
