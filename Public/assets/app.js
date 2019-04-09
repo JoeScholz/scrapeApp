@@ -94,3 +94,17 @@ $.getJSON("/articles", function(data) {
         location.reload();
     });
   })
+
+  $(document).on("click", ".clear", function() {
+    console.log('click scrape');
+    $.ajax({
+        method: "GET",
+        url: "/articles/clear"
+    })
+    // With that done
+    .then(function(data) {
+        // Log the response
+        console.log(data);
+        location.reload();
+    });
+  })
