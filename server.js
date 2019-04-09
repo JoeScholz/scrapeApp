@@ -38,15 +38,9 @@ app.engine("handlebars", exphbs({ defaultLayout: "main" }));
 app.set("view engine", "handlebars");
 
 // Connect to the Mongo DB
-// mongoose.connect("mongodb://localhost/mongoHeadlines", { useNewUrlParser: true });
-var databaseUri = "mongodb://localhost/mongoHeadlines";
-if (process.env.MONGODB_URI) {
-  mongoose.connect(process.env.MONGODB_URI);
-}
-else {
-  mongoose.connect(databaseUri);
-  console.log("Conneted to mongoHeadlines")
-}
+var MONGODB_URI = process.env.MONGODB_URI || "mongodb://localhost/mongoHeadlines";
+
+mongoose.connect(MONGODB_URI);
 
 db.on("error", function(error) {
   console.log("Mongoose Error: ", error);
