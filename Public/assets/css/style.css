@@ -1,0 +1,23 @@
+html, body{
+    width: 100%;
+}
+
+body{
+    background-color: green;
+}
+
+h1.pagetitle{
+    font-size: 7em;
+}
+
+#jumbotron{
+    background: green;
+    color: white;
+    font-size: 10px;
+}
+
+.btn-primary{
+    background-color: whitesmoke;
+    color: olive;
+    border-color: whitesmoke;
+}
