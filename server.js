@@ -4,6 +4,7 @@ var mongoose = require("mongoose");
 var bodyParser = require("body-parser");
 var exphbs = require("express-handlebars");
 var Article = require("./models/Articles.js");
+var Note = require("./models/Note.js")
 
 // Our scraping tools
 // Axios is a promised-based http library, similar to jQuery's Ajax method
@@ -29,6 +30,7 @@ var app = express();
 app.use(logger("dev"));
 // Parse request body as JSON
 app.use(bodyParser.urlencoded({ extended: true }));
+app.use(express.json());
 // Make public a static folder
 app.use(express.static("public"));
 
@@ -38,7 +40,7 @@ app.engine("handlebars", exphbs({ defaultLayout: "main" }));
 app.set("view engine", "handlebars");
 
 // Connect to the Mongo DB
-var MONGODB_URI = process.env.MONGODB_URI || "mongodb://heroku_qzwxpzfp:91u3djn22vm3m57ts616p75sjb@ds119788.mlab.com:19788/heroku_qzwxpzfp";
+var MONGODB_URI = process.env.MONGOLAB_MAUVE_URI || "mongodb://localhost/mongoHeadlines";
 
 mongoose.connect(MONGODB_URI);
 
@@ -123,6 +125,7 @@ app.get("/articles/:id", function(req, res) {
     // ..and populate all of the notes associated with it
     .populate("note")
     .then(function(dbArticle) {
+      console.log(dbArticle);
       // If we were able to successfully find an Article with the given id, send it back to the client
       res.render("notes", {article: dbArticle});
     })
@@ -135,8 +138,10 @@ app.get("/articles/:id", function(req, res) {
 // Route for saving/updating an Article's associated Note
 app.post("/articles/:id", function(req, res) {
   // Create a new note and pass the req.body to the entry
+  console.log(req.body);
   Note.create(req.body)
     .then(function(dbNote) {
+      console.log(dbNote)
       // If a Note was created successfully, find one Article with an `_id` equal to `req.params.id`. Update the Article to be associated with the new Note
       // { new: true } tells the query that we want it to return the updated User -- it returns the original by default
       // Since our mongoose query returns a promise, we can chain another `.then` which receives the result of the query

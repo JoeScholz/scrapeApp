@@ -10,20 +10,22 @@
 
 
     <div class="row">
-        <div class="col-12">
             <ul class="list-group">
                 {{!-- {{#each article}} --}}
                 <li class="list-group-item">
                     <div class="row">
-                        <div class="col-4">
+                        <div class="col-md-4">
                             <h4>{{article.title}}</h4>
                         </div>
-                        <div class="col-0"></div>
-                        <div class="col-5">
+                        <div class="col-md-4">
                             <p>{{article.summary}}</p>
                             <p><a href="{{url}}">{{url}}</a></p>
                         </div>
-                        <div class="col-3">
+                        <div class="col-md-3">
+                            <h5>{{article.note.title}}</h5>
+                            <p>{{article.note.body}}</p>
+                        </div>
+                        <div class="col-md-1">
                             <br>
                             <a href="/articles/{{_id}}">
                             <button class="btn btn-primary" type="button" data-id="{{_id}}">Add/See Notes</button></a>
@@ -33,7 +35,6 @@
                 {{!-- {{/each}} --}}
             </ul>
             <br><br>
-        </div> 
     </div>
     <div>
         {{article.notes}}
